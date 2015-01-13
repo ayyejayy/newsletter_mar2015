@@ -3,11 +3,15 @@ from hubify import hub
 import urllib, json
 from dteam import datastores
 import pandas.io.sql as sql
+from pandas import DataFrame
+from datetime import datetime
 
 
 app = Flask(__name__)
 hub.init_app(app)
 ds = datastores.bi()
+
+df = DataFrame()
 
 def sql_to_df(query):
 	try:
@@ -33,22 +37,34 @@ def teardown_request(exception):
 	if conn is not None:
 		conn.close()
 
+@app.route('/loadDataFrame', methods=['POST'])
+def loadDataFrameFunc():
 
-@app.route('/endpoint', methods=['POST'])
-def funnelFunc():
+	global df
 
-	data = json.loads(request.get_data())
-	date = str(data['date'])
-
-	user_args = {'date': date}
-
-	query = """select count(*) as count
+	user_args = {}
+	query = """select date(t.created) as date, count(*) as value
 			from bizdw_v6.lifecycle_events_trials t 
-			where date(t.created)=%(date)s"""
+			group by date(t.created)
+			"""
 	
 	df = sql.read_sql(query, g.conn, params=user_args)
 
-	return jsonify({"result":df.ix[0,'count']})
+	return jsonify({"msg":"dataframe loaded."})
+
+
+@app.route('/chooseSubset', methods=['POST'])
+def funnelFunc():
+
+	d = dict(json.loads(request.get_data()))
+	startDate = datetime.strptime(d['startDate'], '%Y-%m-%d').date()
+	endDate = datetime.strptime(d['endDate'], '%Y-%m-%d').date()
+
+	dateMap = (df['date'] >= startDate) & (df['date'] <= endDate)
+
+	jsonData = json.loads(df[dateMap].to_json(orient='records'))
+
+	return jsonify({"jsonData":jsonData})
 	
 
 

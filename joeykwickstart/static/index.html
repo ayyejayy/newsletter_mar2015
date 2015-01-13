@@ -18,6 +18,10 @@
 
     <link rel="stylesheet" type="text/css" href="style.css" />
 
+    <script type="text/javascript" src="rsc.js"></script>
+    <script type="text/javascript" src="d3.js"></script>
+    <link rel="stylesheet" href="rsc.css" type="text/css">
+
 
   </head>
 
@@ -36,26 +40,36 @@
     <!-- Main jumbotron for a primary marketing message or call to action -->
     <div class="jumbotron">
       <div class="container">
-        <h1>Welcome to Joey's KwickStart</h1>
-        <p>Your one stop shop for trial counts</p>
+        <h1>Joey's KwickStart</h1>
+        <p>Query the data warehouse and chart the results</p>
       </div>
     </div>
 
-    <div class="container">
-        <form id="form">
-        <input type="text" id="formData" placeholder="2014-09-01">
-        <input type="submit" value="trials count">
-        </form>
 
+
+    <div class="container">
+        <p>Trial counts by day.</p>
+        <form id="form">
+        <input type="text" id="startDate" placeholder="From the start of time">
+        <input type="text" id="endDate" placeholder="to today.">
+        <input type="submit" value="Chart it!">
+        </form>
     </div>
 
-      <hr>
+    <hr>
 
-      <footer>
-        <p>&copy; Stockermans 2014</p>
-      </footer>
-    </div> <!-- /container -->
+    <div class="spinner">
+      <div class="rect1"></div>
+      <div class="rect2"></div>
+      <div class="rect3"></div>
+      <div class="rect4"></div>
+      <div class="rect5"></div>
+    </div>
 
+      
+
+      <div id="chart" style="height: 400px" style="width: 200px"></div>
+      <!-- <div id="chart"></div> -->
 
 
     <!-- Bootstrap core JavaScript
@@ -63,5 +77,8 @@
     <!-- Placed at the end of the document so the pages load faster -->
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js"></script>
     <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.2.0/js/bootstrap.min.js"></script>
+
+    <script src="https://ajax.googleapis.com/ajax/libs/jqueryui/1.10.4/jquery-ui.min.js"></script>
+    <link rel="stylesheet" href="//code.jquery.com/ui/1.11.2/themes/smoothness/jquery-ui.css">
   </body>
 </html>
