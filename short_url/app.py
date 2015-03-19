@@ -1,4 +1,4 @@
-from flask import Flask, url_for, request, make_response, g, current_app, jsonify
+from flask import Flask, url_for, request, make_response, g, current_app, jsonify, redirect
 from hubify import hub
 import urllib, json
 from dteam import datastores
@@ -11,17 +11,18 @@ app = Flask(__name__)
 hub.init_app(app)
 ds = datastores.bi()
 
-df = DataFrame()
+total_dic = {}
+# i = 0
 
-def sql_to_df(query):
-	try:
-		conn = ds.bi_engine.connect().connection
-		df = sql.read_sql(query, conn)
-		return df
-	except:
-		return None
-	finally:
-		conn.close()
+# def sql_to_df(query):
+# 	try:
+# 		conn = ds.bi_engine.connect().connection
+# 		df = sql.read_sql(query, conn)
+# 		return df
+# 	except:
+# 		return None
+# 	finally:
+# 		conn.close()
 
 @app.route('/api', methods=['GET'])
 def home():
@@ -37,37 +38,31 @@ def teardown_request(exception):
 	if conn is not None:
 		conn.close()
 
-@app.route('/loadDataFrame', methods=['POST'])
-def loadDataFrameFunc():
 
-	global df
+@app.route('/map_long_to_short', methods=['POST'])
+def map_long_to_short_function():
 
-	user_args = {}
-	query = """select date(t.created) as date, count(*) as value
-			from bizdw_v6.lifecycle_events_trials t 
-			group by date(t.created)
-			"""
-	
-	df = sql.read_sql(query, g.conn, params=user_args)
+	global total_dic
+	# global i
 
-	return jsonify({"msg":"dataframe loaded."})
-
-
-@app.route('/chooseSubset', methods=['POST'])
-def funnelFunc():
-
+	# i += 1
 	d = dict(json.loads(request.get_data()))
-	startDate = datetime.strptime(d['startDate'], '%Y-%m-%d').date()
-	endDate = datetime.strptime(d['endDate'], '%Y-%m-%d').date()
 
-	dateMap = (df['date'] >= startDate) & (df['date'] <= endDate)
+	h = str(hash(d["long_url"]))
 
-	jsonData = json.loads(df[dateMap].to_json(orient='records'))
+	total_dic[h] = d["long_url"]
+	print total_dic
 
-	return jsonify({"jsonData":jsonData})
+	return jsonify({"short_url":h})
 	
 
 
+@app.route('/src/<short_url>',methods=['GET'])
+def static_proxy(short_url):
+
+	global total_dic
+
+	return redirect(total_dic[short_url], code=302)
 
 
 
